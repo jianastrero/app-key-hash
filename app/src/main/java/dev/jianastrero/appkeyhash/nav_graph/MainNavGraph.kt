@@ -1,6 +1,5 @@
-package dev.jianastrero.appkeyhash.ui.nav_graph
+package dev.jianastrero.appkeyhash.nav_graph
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
