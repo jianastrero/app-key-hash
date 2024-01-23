@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             AppKeyHashTheme(modifier = Modifier.fillMaxSize()) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Main.route
+                    startDestination = Screen.Main.fullRoute
                 ) {
                     mainNavGraph(
                         navController = navController,

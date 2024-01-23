@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import dev.jianastrero.appkeyhash.viewmodel.MainViewModel
 
 @Composable
 fun MainScreen(
+    onAppClick: (packageName: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -95,7 +97,9 @@ fun MainScreen(
                     items(filteredApps) { app ->
                         AppItem(
                             app = app,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .clickable { onAppClick(app.applicationInfo.packageName) }
+                                .fillMaxSize()
                         )
                     }
                 }
@@ -108,6 +112,6 @@ fun MainScreen(
 @Composable
 private fun MainScreenPreview() {
     AppKeyHashTheme(modifier = Modifier.fillMaxSize()) {
-        MainScreen()
+        MainScreen(onAppClick = {})
     }
 }
