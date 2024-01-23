@@ -10,16 +10,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import dev.jianastrero.appkeyhash.ui.enumeration.Screen
+import dev.jianastrero.appkeyhash.ui.nav_graph.mainNavGraph
 import dev.jianastrero.appkeyhash.ui.theme.AppKeyHashTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            AppKeyHashTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Greeting("Android")
+
+            val navController = rememberNavController()
+
+            AppKeyHashTheme(modifier = Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Main.route
+                ) {
+                    mainNavGraph(
+                        navController = navController,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }
