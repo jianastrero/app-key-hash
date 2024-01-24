@@ -4,7 +4,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
-sealed class Screen(private val route: String) {
+sealed class Screen(val route: String) {
 
     open val arguments: List<NamedNavArgument> = emptyList()
     val fullRoute: String
@@ -12,7 +12,7 @@ sealed class Screen(private val route: String) {
             return if (arguments.isEmpty()) {
                 route
             } else {
-                "$route?${arguments.joinToString("&") { "${it.name}={${it.name}}" }}"
+                "$route/${arguments.joinToString("/") { "{${it.name}}" }}"
             }
         }
 

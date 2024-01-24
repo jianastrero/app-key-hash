@@ -1,5 +1,6 @@
 package dev.jianastrero.appkeyhash.nav_graph
 
+import android.util.Log
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -15,7 +16,10 @@ fun NavGraphBuilder.mainNavGraph(
     composable(Screen.Main.fullRoute) {
         MainScreen(
             onAppClick = { packageName ->
-                navController.navigate("${Screen.AppDetails.fullRoute}/$packageName")
+                Log.d("JIANDDEBUG", "packageName: $packageName")
+                Log.d("JIANDDEBUG", "fullRoute: ${Screen.AppDetails.fullRoute}")
+                Log.d("JIANDDEBUG", "route: ${Screen.AppDetails.route}/$packageName")
+                navController.navigate("${Screen.AppDetails.route}/$packageName")
             },
             modifier = modifier
         )
@@ -27,6 +31,9 @@ fun NavGraphBuilder.mainNavGraph(
         val packageName = backStackEntry.arguments?.getString(Screen.AppDetails.PACKAGE_NAME).orEmpty()
 
         AppDetailScreen(
+            onBackPress = {
+                navController.popBackStack()
+            },
             packageName = packageName,
             modifier = modifier
         )
