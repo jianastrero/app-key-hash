@@ -1,11 +1,16 @@
 package dev.jianastrero.appkeyhash.use_case
 
 import android.content.Context
-import android.content.pm.PackageInfo
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
+import android.content.pm.Signature
 import android.util.Base64
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.*
 import javax.inject.Inject
 
 
@@ -13,20 +18,71 @@ class GetAppKeyHashUseCase @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke(packageName: String): String? {
-        try {
-            val info: PackageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            for (signature in info.signatures) {
-                val md = MessageDigest.getInstance("SHA")
-                md.update(signature.toByteArray())
+        val x = AppSignatureHelper(context, packageName).appSignatures
+        return if (x.isEmpty()) {
+            null
+        } else {
+            x[0]
+        }
+    }
+}
 
-                val keyHash: String = Base64.encodeToString(md.digest(), Base64.DEFAULT)
-                return keyHash
+private class AppSignatureHelper(context: Context?, private val packageName: String) : ContextWrapper(context) {
+    val appSignatures: ArrayList<String>
+        /**
+         * Get all the app signatures for the current package
+         * @return
+         */
+        get() {
+            val appCodes = ArrayList<String>()
+
+            try {
+                // Get all package signatures for the current package
+                val packageManager = packageManager
+                val signatures: Array<Signature> = packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.GET_SIGNATURES
+                ).signatures
+
+                // For each signature create a compatible hash
+                for (signature in signatures) {
+                    val hash = hash(packageName, signature.toCharsString())
+                    if (hash != null) {
+                        appCodes.add(String.format("%s", hash))
+                    }
+                }
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Unable to find package to obtain hash.", e)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
+            return appCodes
         }
 
-        return null
+    companion object {
+        val TAG: String = AppSignatureHelper::class.java.simpleName
+
+        private const val HASH_TYPE = "SHA-256"
+        const val NUM_HASHED_BYTES: Int = 9
+        const val NUM_BASE64_CHAR: Int = 11
+
+        private fun hash(packageName: String, signature: String): String? {
+            val appInfo = "$packageName $signature"
+            try {
+                val messageDigest = MessageDigest.getInstance(HASH_TYPE)
+                messageDigest.update(appInfo.toByteArray(StandardCharsets.UTF_8))
+                var hashSignature = messageDigest.digest()
+
+                // truncated into NUM_HASHED_BYTES
+                hashSignature = Arrays.copyOfRange(hashSignature, 0, NUM_HASHED_BYTES)
+                // encode into Base64
+                var base64Hash = Base64.encodeToString(hashSignature, Base64.NO_PADDING or Base64.NO_WRAP)
+                base64Hash = base64Hash.substring(0, NUM_BASE64_CHAR)
+
+                Log.d(TAG, String.format("pkg: %s -- hash: %s", packageName, base64Hash))
+                return base64Hash
+            } catch (e: NoSuchAlgorithmException) {
+                Log.e(TAG, "hash:NoSuchAlgorithm", e)
+            }
+            return null
+        }
     }
 }
